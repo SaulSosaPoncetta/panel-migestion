@@ -12,7 +12,7 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Auth::routes(['register' => false]);
+
 
 Route::get('/home', [HomeController::class, 'index'])->name('dashboard');
 
@@ -30,3 +30,5 @@ Route::middleware('auth')->group(function () {
 
 // Webhook público (Mercado Pago no manda cookies de sesión ni CSRF token)
 Route::post('/webhooks/mercadopago', MercadoPagoWebhookController::class)->name('webhooks.mercadopago');
+
+require __DIR__.'/auth.php';

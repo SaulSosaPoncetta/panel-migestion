@@ -30,30 +30,11 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login', compact('intentos', 'captchaActivo', 'siteKey', 'umbral'));
     }
 
-        public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
 
-        $user = auth()->user();
-        if ($user->id_empresa && $user->empresa && !$user->empresa->estado) {
-            auth()->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return back()->withErrors([
-                'email' => 'Tu empresa se encuentra suspendida. Contactá al administrador del sistema.',
-            ]);
-        }
-
         $request->session()->regenerate();
-
-    if (auth()->user()->hasRole('superadmin')) {
-        return redirect()->route('superadmin.empresas.index');
-    }
-
-    if (auth()->user()->hasRole('admin')) {
-        return redirect()->route('dashboard');
-    }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
