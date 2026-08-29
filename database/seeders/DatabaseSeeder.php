@@ -14,11 +14,16 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RoleSeeder::class);
 
-        $admin = User::factory()->create([
-            'name' => 'Saul',
-            'email' => 'admin@migestion.com.ar',
-        ]);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@migestion.com.ar'],
+            [
+                'name' => 'Saul',
+                'password' => bcrypt('password'),
+            ]
+        );
 
-        $admin->assignRole('superadmin');
+        if (! $admin->hasRole('superadmin')) {
+            $admin->assignRole('superadmin');
+        }
     }
 }
