@@ -41,7 +41,6 @@
                 <i class="bi bi-diagram-3-fill fs-2"></i>
             </div>
             <h3 class="fw-bold">MiGestión Panel</h3>
-            <p class="text-muted">Clientes y cobros de tus sistemas SaaS</p>
         </div>
 
         <div class="card border-0 shadow-sm">
