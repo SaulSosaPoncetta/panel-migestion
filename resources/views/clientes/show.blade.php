@@ -29,6 +29,58 @@
     </div>
 </div>
 
+{{-- Integración automática GestiónComercial → Contabilidad --}}
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-arrow-left-right me-1"></i>Integración GestiónComercial → Contabilidad</span>
+        <form method="POST" action="{{ route('vinculaciones.revisar', $cliente) }}">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-search"></i> Revisar</button>
+        </form>
+    </div>
+    <div class="card-body">
+        @forelse($cliente->vinculaciones as $v)
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 {{ ! $loop->last ? 'border-bottom pb-2 mb-2' : '' }}">
+                <div>
+                    <span class="badge bg-{{ $v->colorEstado() }}">{{ $v->etiquetaEstado() }}</span>
+                    @if($v->vinculada_at && $v->estado === 'vinculada')
+                        <span class="small text-muted ms-1">desde {{ $v->vinculada_at->format('d/m/Y H:i') }}</span>
+                    @endif
+                    @if($v->mensaje)
+                        <div class="small {{ $v->estado === 'error' ? 'text-danger' : 'text-muted' }} mt-1">{{ $v->mensaje }}</div>
+                    @endif
+                </div>
+                <div class="d-flex gap-1">
+                    <form method="POST" action="{{ route('vinculaciones.vincular', $v) }}"
+                          @if($v->estado === 'por_confirmar') onsubmit="return confirm('¿Confirmás que las dos cuentas son de la misma empresa? Las facturas de GestiónComercial van a pasar a esa contabilidad.');" @endif>
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                            @if($v->estado === 'por_confirmar')
+                                <i class="bi bi-check2"></i> Confirmar y vincular
+                            @elseif($v->estado === 'vinculada')
+                                <i class="bi bi-key"></i> Renovar token
+                            @else
+                                <i class="bi bi-arrow-repeat"></i> Vincular
+                            @endif
+                        </button>
+                    </form>
+                    @if($v->estado === 'vinculada')
+                        <form method="POST" action="{{ route('vinculaciones.desvincular', $v) }}"
+                              onsubmit="return confirm('¿Cortar la integración? GestiónComercial deja de enviar las facturas a la contabilidad.');">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i> Desvincular</button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <div class="small text-muted">
+                Se vincula sola cuando la misma empresa (mismo CUIT y email) tiene cuenta en GestiónComercial y en Contabilidad.
+            </div>
+        @endforelse
+    </div>
+</div>
+
 {{-- Vincular un nuevo sistema --}}
 <div class="card shadow-sm mb-3">
     <div class="card-header bg-white"><i class="bi bi-plus-lg me-1"></i>Vincular a un sistema</div>

@@ -15,7 +15,7 @@ class ClienteSistema extends Model
     protected $primaryKey = 'id_cliente_sistema';
 
     protected $fillable = [
-        'id_cliente', 'id_sistema', 'referencia_externa', 'fecha_alta',
+        'id_cliente', 'id_sistema', 'referencia_externa', 'email_alta', 'identificacion_fiscal_alta', 'fecha_alta',
     ];
 
     public function cliente(): BelongsTo

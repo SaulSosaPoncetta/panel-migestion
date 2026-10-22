@@ -51,7 +51,7 @@ class ClienteController extends Controller
 
     public function show(Cliente $cliente)
     {
-        $cliente->load(['clienteSistemas.sistema', 'clienteSistemas.suscripciones.pagos']);
+        $cliente->load(['clienteSistemas.sistema', 'clienteSistemas.suscripciones.pagos', 'vinculaciones']);
         $sistemas = SistemaSaas::where('activo', true)->orderBy('nombre')->get();
 
         return view('clientes.show', compact('cliente', 'sistemas'));

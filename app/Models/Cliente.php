@@ -25,4 +25,17 @@ class Cliente extends Model
     {
         return $this->hasMany(ClienteSistema::class, 'id_cliente', 'id_cliente');
     }
+
+    public function vinculaciones(): HasMany
+    {
+        return $this->hasMany(Vinculacion::class, 'id_cliente', 'id_cliente');
+    }
+
+    /** CUIT solo con números (para comparar sin guiones). */
+    public static function normalizarCuit(?string $cuit): ?string
+    {
+        $digitos = preg_replace('/\D/', '', (string) $cuit);
+
+        return $digitos !== '' ? $digitos : null;
+    }
 }
