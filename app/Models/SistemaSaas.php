@@ -28,6 +28,11 @@ class SistemaSaas extends Model
         return $this->hasMany(ClienteSistema::class, 'id_sistema', 'id_sistema');
     }
 
+    public function planes(): HasMany
+    {
+        return $this->hasMany(Plan::class, 'id_sistema', 'id_sistema');
+    }
+
     protected static function booted(): void
     {
         static::creating(function (self $sistema) {

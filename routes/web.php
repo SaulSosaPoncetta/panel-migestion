@@ -4,6 +4,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ClienteSistemaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MercadoPagoWebhookController;
+use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SistemaSaasController;
 use App\Http\Controllers\SuscripcionController;
 use App\Http\Controllers\VinculacionController;
@@ -19,6 +20,8 @@ Route::get('/home', [HomeController::class, 'index'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::resource('sistemas', SistemaSaasController::class)->only(['index', 'create', 'store', 'show']);
+
+    Route::resource('planes', PlanController::class)->parameters(['planes' => 'plan'])->only(['index', 'create', 'store', 'edit', 'update']);
 
     Route::resource('clientes', ClienteController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('clientes/{cliente}/sistemas', [ClienteSistemaController::class, 'store'])->name('clientes.sistemas.store');

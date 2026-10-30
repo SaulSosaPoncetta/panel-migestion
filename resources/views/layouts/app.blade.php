@@ -113,6 +113,11 @@
                 <i class="bi bi-people"></i><span class="link-label ms-2">Clientes</span>
             </a>
 
+            <a class="nav-link {{ request()->is('planes*') ? 'active' : '' }}" href="{{ route('planes.index') }}"
+                title="Planes y precios">
+                <i class="bi bi-tags"></i><span class="link-label ms-2">Planes y precios</span>
+            </a>
+
             <div class="nav-header">SaaS</div>
             <a class="nav-link {{ request()->is('sistemas*') ? 'active' : '' }}" href="{{ route('sistemas.index') }}"
                 title="Sistemas SaaS">
