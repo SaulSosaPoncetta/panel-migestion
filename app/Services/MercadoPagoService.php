@@ -35,7 +35,7 @@ class MercadoPagoService
 
         $response = $this->http()->post("{$this->baseUrl}/checkout/preferences", [
             'items' => [[
-                'title' => "{$sistema->nombre} - {$suscripcion->plan}",
+                'title' => $this->titulo($suscripcion, $sistema->nombre),
                 'quantity' => 1,
                 'currency_id' => $suscripcion->moneda,
                 'unit_price' => (float) $suscripcion->monto,
@@ -66,11 +66,11 @@ class MercadoPagoService
         $sistema = $clienteSistema->sistema;
 
         $response = $this->http()->post("{$this->baseUrl}/preapproval", [
-            'reason' => "{$sistema->nombre} - {$suscripcion->plan}",
+            'reason' => $this->titulo($suscripcion, $sistema->nombre),
             'external_reference' => (string) $suscripcion->id_suscripcion,
             'payer_email' => $cliente->email,
             'auto_recurring' => [
-                'frequency' => 1,
+                'frequency' => max(1, (int) ($suscripcion->planCatalogo?->duracion_meses ?? 1)),
                 'frequency_type' => 'months',
                 'transaction_amount' => (float) $suscripcion->monto,
                 'currency_id' => $suscripcion->moneda,
@@ -83,6 +83,18 @@ class MercadoPagoService
         $response->throw();
 
         return $response->json();
+    }
+
+    protected function titulo(Suscripcion $suscripcion, string $sistema): string
+    {
+        $titulo = "{$sistema} - {$suscripcion->plan}";
+        $plan = $suscripcion->planCatalogo;
+
+        if ($plan && $plan->cobro_por_unidad && $suscripcion->cantidad > 1) {
+            $titulo .= " ({$suscripcion->cantidad} ".($plan->unidad_nombre ?: 'unidades').')';
+        }
+
+        return $titulo;
     }
 
     public function obtenerPago(string $paymentId): array

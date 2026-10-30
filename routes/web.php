@@ -4,6 +4,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ClienteSistemaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MercadoPagoWebhookController;
+use App\Http\Controllers\PagoPublicoController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SistemaSaasController;
 use App\Http\Controllers\SuscripcionController;
@@ -17,6 +18,16 @@ Route::get('/', function () {
 
 
 Route::get('/home', [HomeController::class, 'index'])->name('dashboard');
+
+// Página pública de pago (se entra con un enlace firmado generado por cada sistema)
+Route::middleware('throttle:40,1')->group(function () {
+    Route::get('/pagar', [PagoPublicoController::class, 'mostrar'])->name('pagar.mostrar');
+    Route::post('/pagar', [PagoPublicoController::class, 'iniciar'])->name('pagar.iniciar');
+    // Coinciden con las MP_BACK_URL_* por defecto de config/mercadopago.php
+    Route::get('/pagos/{estado}', [PagoPublicoController::class, 'resultado'])
+        ->whereIn('estado', ['exito', 'error', 'pendiente'])
+        ->name('pagos.resultado');
+});
 
 Route::middleware('auth')->group(function () {
     Route::resource('sistemas', SistemaSaasController::class)->only(['index', 'create', 'store', 'show']);
