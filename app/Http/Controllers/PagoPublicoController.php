@@ -159,6 +159,34 @@ class PagoPublicoController extends Controller
         return redirect()->away($link);
     }
 
+    /**
+     * Enlace de renovación de los mails (URL firmada de Laravel, válida 30 días).
+     * Genera al momento un enlace de pago fresco y redirige a la página de pago.
+     */
+    public function renovar(ClienteSistema $clienteSistema)
+    {
+        $sistema = $clienteSistema->sistema;
+
+        if (! $sistema || ! $sistema->activo || ! $clienteSistema->referencia_externa) {
+            return $this->invalido('No pudimos abrir el pago. Entrá al sistema y tocá "Pagar".');
+        }
+
+        $suscripcion = $clienteSistema->suscripciones()
+            ->where('estado', '!=', 'cancelada')
+            ->latest('id_suscripcion')
+            ->with('planCatalogo')
+            ->first();
+
+        $params = ['ref' => $clienteSistema->referencia_externa];
+
+        if ($suscripcion?->planCatalogo?->activo) {
+            $params['plan'] = $suscripcion->planCatalogo->codigo;
+            $params['cantidad'] = (string) max(1, (int) $suscripcion->cantidad);
+        }
+
+        return redirect()->to(EnlacePago::generarUrl($sistema, $params));
+    }
+
     /** A donde vuelve Mercado Pago después del pago (éxito, error o pendiente). */
     public function resultado(Request $request, string $estado)
     {

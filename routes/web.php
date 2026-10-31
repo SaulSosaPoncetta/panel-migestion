@@ -25,6 +25,7 @@ Route::get('/home', [HomeController::class, 'index'])->name('dashboard');
 Route::middleware('throttle:40,1')->group(function () {
     Route::get('/pagar', [PagoPublicoController::class, 'mostrar'])->name('pagar.mostrar');
     Route::post('/pagar', [PagoPublicoController::class, 'iniciar'])->name('pagar.iniciar');
+    Route::get('/pagar/renovar/{clienteSistema}', [PagoPublicoController::class, 'renovar'])->middleware('signed')->name('pagar.renovar');
     Route::get('/pagar/transferencia/{pago}', [TransferenciaController::class, 'mostrar'])->middleware('signed')->name('pagar.transferencia');
     Route::post('/pagar/transferencia/{pago}', [TransferenciaController::class, 'subir'])->middleware('signed')->name('pagar.comprobante');
     // Coinciden con las MP_BACK_URL_* por defecto de config/mercadopago.php

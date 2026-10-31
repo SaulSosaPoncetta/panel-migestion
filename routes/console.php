@@ -34,3 +34,9 @@ Artisan::command('hub:vincular-contable {--cliente=}', function (VinculadorConta
 
 // Reintenta las vinculaciones con error (requiere el cron de schedule:run en el servidor)
 Schedule::command('hub:vincular-contable')->hourly()->withoutOverlapping();
+
+// Avisos de vencimiento, paso a "vencida" y resumen diario (requiere el cron de schedule:run en el servidor)
+Schedule::command('panel:procesar-vencimientos')
+    ->dailyAt('08:00')
+    ->timezone('America/Argentina/Buenos_Aires')
+    ->withoutOverlapping();

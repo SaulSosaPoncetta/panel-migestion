@@ -16,7 +16,7 @@ class Suscripcion extends Model
 
     protected $fillable = [
         'id_cliente_sistema', 'id_plan', 'plan', 'tipo', 'cantidad', 'monto', 'moneda', 'estado',
-        'fecha_inicio', 'proxima_fecha_cobro', 'fecha_vencimiento', 'mp_preapproval_id',
+        'fecha_inicio', 'proxima_fecha_cobro', 'fecha_vencimiento', 'aviso_umbral', 'mp_preapproval_id',
     ];
 
     protected $casts = [

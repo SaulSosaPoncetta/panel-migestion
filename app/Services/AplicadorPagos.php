@@ -3,11 +3,12 @@
 namespace App\Services;
 
 use App\Models\Suscripcion;
+use Illuminate\Support\Carbon;
 
 /**
  * Único lugar donde un pago aprobado "se aplica" a una suscripción: calcula el nuevo
  * vencimiento según el plan, deja la suscripción activa y le avisa al sistema satélite.
- * Lo usan el webhook de Mercado Pago y (en el próximo paso) la aprobación manual de transferencias.
+ * Lo usan el webhook de Mercado Pago y la aprobación manual de transferencias.
  */
 class AplicadorPagos
 {
@@ -23,16 +24,17 @@ class AplicadorPagos
         // y las de pago único quedan sin vencimiento.
         $meses = $plan ? $plan->duracion_meses : ($suscripcion->tipo === 'recurrente' ? 1 : null);
 
-        $hoy = today();
+        // Fechas como texto "Y-m-d" en la zona horaria del negocio, para no mezclar husos.
+        $hoy = Carbon::today(config('pagos.zona_horaria'))->toDateString();
         $vencimiento = null;
 
         if ($meses !== null) {
-            // Si todavía le quedaban días, el nuevo período se suma al final del actual (no pierde días).
-            $base = $suscripcion->fecha_vencimiento && $suscripcion->fecha_vencimiento->gte($hoy)
-                ? $suscripcion->fecha_vencimiento->copy()
-                : $hoy->copy();
+            $actual = $suscripcion->fecha_vencimiento?->toDateString();
 
-            $vencimiento = $base->addMonthsNoOverflow((int) $meses);
+            // Si todavía le quedaban días, el nuevo período se suma al final del actual (no pierde días).
+            $base = $actual && $actual >= $hoy ? $actual : $hoy;
+
+            $vencimiento = Carbon::parse($base)->addMonthsNoOverflow((int) $meses)->toDateString();
         }
 
         $suscripcion->update([
@@ -40,6 +42,7 @@ class AplicadorPagos
             'fecha_inicio' => $suscripcion->fecha_inicio ?? $hoy,
             'fecha_vencimiento' => $vencimiento,
             'proxima_fecha_cobro' => $suscripcion->tipo === 'recurrente' ? $vencimiento : null,
+            'aviso_umbral' => null,
         ]);
 
         $suscripcion = $suscripcion->fresh();
