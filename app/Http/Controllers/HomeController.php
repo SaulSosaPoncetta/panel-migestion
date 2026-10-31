@@ -39,6 +39,11 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
+        $transferenciasPorRevisar = Pago::where('medio_pago', 'transferencia')
+            ->where('estado', 'pendiente')
+            ->whereNotNull('comprobante_path')
+            ->count();
+
         $tarjetas = $this->tarjetasPorSistema();
 
         return view('home', compact(
@@ -47,7 +52,8 @@ class HomeController extends Controller
             'cobradoEsteMes',
             'ingresoRecurrente',
             'proximosVencimientos',
-            'tarjetas'
+            'tarjetas',
+            'transferenciasPorRevisar'
         ));
     }
 

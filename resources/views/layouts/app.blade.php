@@ -113,6 +113,10 @@
                 <i class="bi bi-people"></i><span class="link-label ms-2">Clientes</span>
             </a>
 
+            <a class="nav-link {{ request()->is('registro-pagos*') ? 'active' : '' }}" href="{{ route('pagos.index') }}"
+                title="Pagos">
+                <i class="bi bi-cash-coin"></i><span class="link-label ms-2">Pagos</span>
+            </a>
             <a class="nav-link {{ request()->is('planes*') ? 'active' : '' }}" href="{{ route('planes.index') }}"
                 title="Planes y precios">
                 <i class="bi bi-tags"></i><span class="link-label ms-2">Planes y precios</span>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cliente;
 use App\Models\ClienteSistema;
+use App\Models\Pago;
 use App\Models\Plan;
 use App\Models\SistemaSaas;
 use App\Models\Suscripcion;
@@ -12,6 +13,7 @@ use App\Services\MercadoPagoService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 
 /**
  * Página pública de pago del Panel. Se entra únicamente con un enlace firmado
@@ -45,6 +47,7 @@ class PagoPublicoController extends Controller
             'suscripcion' => $suscripcion,
             'cantidadInicial' => (int) ($q['cantidad'] ?? 0),
             'queryFirmada' => http_build_query($q, '', '&', PHP_QUERY_RFC3986),
+            'transferenciaActiva' => (bool) config('pagos.transferencia.activa'),
         ]);
     }
 
@@ -55,7 +58,12 @@ class PagoPublicoController extends Controller
         $request->validate([
             'id_plan' => 'required|integer',
             'cantidad' => 'nullable|integer|min:1',
+            'medio' => 'nullable|in:mercadopago,transferencia',
         ]);
+
+        $medio = $request->input('medio') === 'transferencia' && config('pagos.transferencia.activa')
+            ? 'transferencia'
+            : 'mercadopago';
 
         $plan = Plan::where('id_plan', $request->id_plan)
             ->where('id_sistema', $sistema->id_sistema)
@@ -126,15 +134,26 @@ class PagoPublicoController extends Controller
                 ]);
             }
 
+            if ($medio === 'transferencia') {
+                $pago = $this->pagoTransferencia($suscripcion);
+
+                return redirect()->to(URL::temporarySignedRoute(
+                    'pagar.transferencia', now()->addDays(7), ['pago' => $pago->id_pago]
+                ));
+            }
+
             $link = $this->generarLink($suscripcion->fresh('planCatalogo'), $mercadoPago);
         } catch (\Throwable $e) {
-            Log::error('No se pudo generar el pago en Mercado Pago', [
+            Log::error('No se pudo generar el pago', [
                 'sistema' => $sistema->slug,
                 'ref' => $clienteSistema->referencia_externa,
+                'medio' => $medio,
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'No pudimos conectar con Mercado Pago. Probá de nuevo en unos minutos.');
+            return back()->with('error', $medio === 'transferencia'
+                ? 'No pudimos preparar la transferencia. Probá de nuevo en unos minutos.'
+                : 'No pudimos conectar con Mercado Pago. Probá de nuevo en unos minutos.');
         }
 
         return redirect()->away($link);
@@ -156,6 +175,25 @@ class PagoPublicoController extends Controller
         return view('pagar.resultado', [
             'estado' => in_array($estado, ['exito', 'error', 'pendiente'], true) ? $estado : 'pendiente',
             'sistema' => $sistema,
+        ]);
+    }
+
+    /** Reutiliza el pago por transferencia pendiente del mismo monto o crea uno nuevo. */
+    protected function pagoTransferencia(Suscripcion $suscripcion): Pago
+    {
+        $existente = $suscripcion->pagos()
+            ->where('medio_pago', 'transferencia')
+            ->where('estado', 'pendiente')
+            ->where('monto', $suscripcion->monto)
+            ->latest('id_pago')
+            ->first();
+
+        return $existente ?? Pago::create([
+            'id_suscripcion' => $suscripcion->id_suscripcion,
+            'medio_pago' => 'transferencia',
+            'monto' => $suscripcion->monto,
+            'moneda' => $suscripcion->moneda,
+            'estado' => 'pendiente',
         ]);
     }
 

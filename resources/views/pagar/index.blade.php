@@ -82,9 +82,15 @@
                 <span class="fs-4 fw-semibold" id="total">—</span>
             </div>
 
-            <button class="btn btn-marca btn-lg w-100 mt-3">
+            <button type="submit" name="medio" value="mercadopago" class="btn btn-marca btn-lg w-100 mt-3">
                 <i class="bi bi-credit-card me-1"></i>Pagar con Mercado Pago
             </button>
+            @if($transferenciaActiva)
+                <button type="submit" name="medio" value="transferencia" class="btn btn-outline-secondary btn-lg w-100 mt-2">
+                    <i class="bi bi-bank me-1"></i>Pagar por transferencia bancaria
+                </button>
+                <div class="form-text text-center">Con transferencia, tu servicio se activa cuando acreditamos el pago.</div>
+            @endif
         </form>
     </div>
 </div>

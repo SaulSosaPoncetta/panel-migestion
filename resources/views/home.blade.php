@@ -3,6 +3,14 @@
 @section('content')
 <h3 class="mb-3"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h3>
 
+@if($transferenciasPorRevisar > 0)
+<div class="alert alert-warning d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-hourglass-split me-1"></i>
+        Tenés <strong>{{ $transferenciasPorRevisar }}</strong> {{ $transferenciasPorRevisar === 1 ? 'transferencia' : 'transferencias' }} con comprobante esperando tu revisión.</span>
+    <a href="{{ route('pagos.index', ['estado' => 'pendiente', 'medio' => 'transferencia']) }}" class="btn btn-sm btn-warning">Revisar</a>
+</div>
+@endif
+
 {{-- Totales de todos los sistemas --}}
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg">
