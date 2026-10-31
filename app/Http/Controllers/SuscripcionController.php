@@ -70,7 +70,7 @@ class SuscripcionController extends Controller
         ]);
 
         $suscripcion->update(['estado' => $data['estado']]);
-        $notificador->avisarCambioEstado($suscripcion->clienteSistema, $data['estado']);
+        $notificador->avisarSuscripcion($suscripcion->fresh());
 
         return back()->with('success', 'Estado actualizado y sistema satélite notificado.');
     }

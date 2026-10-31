@@ -14,6 +14,8 @@ class EstadoClienteController extends Controller
      *
      * El sistema satélite llama esto en el login (con caché local de unas
      * horas) para saber si el cliente está al día o hay que bloquearlo.
+     * Devuelve lo mismo que el aviso POST {url_base}/api/panel/abono, así el sistema
+     * se pone al día aunque el aviso se haya perdido.
      */
     public function show(Request $request)
     {
@@ -25,7 +27,7 @@ class EstadoClienteController extends Controller
         ]);
 
         $query = ClienteSistema::where('id_sistema', $sistema->id_sistema)
-            ->with(['suscripciones' => fn ($q) => $q->latest('id_suscripcion')]);
+            ->with(['suscripciones' => fn ($q) => $q->latest('id_suscripcion'), 'suscripciones.planCatalogo']);
 
         if ($request->referencia_externa) {
             $query->where('referencia_externa', $request->referencia_externa);
@@ -45,6 +47,10 @@ class EstadoClienteController extends Controller
             'encontrado' => true,
             'estado' => $suscripcion?->estado ?? 'sin_suscripcion',
             'plan' => $suscripcion?->plan,
+            'plan_codigo' => $suscripcion?->planCatalogo?->codigo,
+            'tipo' => $suscripcion?->tipo,
+            'cantidad' => $suscripcion ? (int) $suscripcion->cantidad : null,
+            'fecha_vencimiento' => $suscripcion?->fecha_vencimiento?->toDateString(),
             'proxima_fecha_cobro' => $suscripcion?->proxima_fecha_cobro,
         ]);
     }
