@@ -45,14 +45,19 @@
                     </td>
                     <td><code>{{ $plan->codigo }}</code></td>
                     <td>
-                        {{ $plan->tipo === 'unico' ? 'Pago único' : 'Recurrente' }}
+                        {{ $plan->tipo === 'unico' ? 'Pago adelantado' : 'Débito automático' }}
                         <div class="text-muted small">{{ $plan->periodoTexto() }}</div>
                     </td>
                     <td class="text-end">
                         {{ $plan->moneda }} {{ number_format($plan->precio, 2, ',', '.') }}
                         @if($plan->cobro_por_unidad)
-                            <div class="text-muted small">por {{ $plan->unidad_nombre ?: 'unidad' }}
+                            <div class="text-muted small">por {{ $plan->unidad_nombre ?: 'unidad' }}{{ $plan->esMensual() ? ' por mes' : '' }}
                                 ({{ $plan->unidad_minima }}{{ $plan->unidad_maxima ? '–'.$plan->unidad_maxima : '+' }})</div>
+                            @foreach($plan->escalas as $e)
+                                <div class="text-muted small">{{ $e->desde }}{{ $e->hasta ? '–'.$e->hasta : '+' }}: {{ $plan->moneda }} {{ number_format($e->precio, 2, ',', '.') }}</div>
+                            @endforeach
+                        @elseif($plan->esMensual())
+                            <div class="text-muted small">por mes</div>
                         @endif
                     </td>
                     <td>

@@ -14,7 +14,8 @@ class Pago extends Model
     protected $primaryKey = 'id_pago';
 
     protected $fillable = [
-        'id_suscripcion', 'medio_pago', 'mp_payment_id', 'mp_preference_id',
+        'id_suscripcion', 'id_plan', 'medio_pago', 'concepto', 'meses', 'cantidad',
+        'mp_payment_id', 'mp_preference_id',
         'monto', 'moneda', 'estado', 'fecha_pago', 'payload_raw',
         'comprobante_path', 'comprobante_nombre', 'fecha_transferencia', 'nota_cliente',
         'comprobante_subido_at', 'revisado_por', 'revisado_at', 'motivo_rechazo',
@@ -32,6 +33,11 @@ class Pago extends Model
     public function suscripcion(): BelongsTo
     {
         return $this->belongsTo(Suscripcion::class, 'id_suscripcion', 'id_suscripcion');
+    }
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'id_plan', 'id_plan');
     }
 
     public function revisor(): BelongsTo
@@ -53,5 +59,29 @@ class Pago extends Model
     public function esImagenComprobante(): bool
     {
         return (bool) preg_match('/\.(jpe?g|png)$/i', (string) $this->comprobante_path);
+    }
+
+    /** Qué se está pagando, en palabras: "Institución · 6 meses · 12 docentes" / "Ampliación a 15 docentes". */
+    public function detalleTexto(): string
+    {
+        $plan = $this->plan ?? $this->suscripcion?->planCatalogo;
+        $unidad = $plan?->unidad_nombre ?: 'unidades';
+        $nombre = $plan?->nombre ?? $this->suscripcion?->plan ?? 'Abono';
+
+        if ($this->concepto === 'ampliacion') {
+            return "{$nombre} · ampliación a {$this->cantidad} {$unidad}";
+        }
+
+        $partes = [$nombre];
+
+        if ($this->meses) {
+            $partes[] = $this->meses.' '.($this->meses == 1 ? 'mes' : 'meses');
+        }
+
+        if ($plan?->cobro_por_unidad && $this->cantidad) {
+            $partes[] = "{$this->cantidad} {$unidad}";
+        }
+
+        return implode(' · ', $partes);
     }
 }

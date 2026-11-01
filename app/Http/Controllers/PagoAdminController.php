@@ -73,7 +73,7 @@ class PagoAdminController extends Controller
         }
 
         // Fuera de la transacción: calcula el vencimiento y avisa al sistema (llamada HTTP).
-        $aplicador->acreditar($pago->suscripcion);
+        $aplicador->acreditar($pago->suscripcion, $pago->fresh());
 
         return redirect()->route('pagos.show', $pago)
             ->with('success', 'Pago aprobado: la suscripción quedó activa y se avisó al sistema.');

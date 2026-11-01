@@ -103,6 +103,7 @@ class HomeController extends Controller
 
         $pagosPendientes = $pagosBase()
             ->where('pagos.estado', 'pendiente')
+            ->where(fn ($q) => $q->whereNotNull('pagos.comprobante_path')->orWhereNotNull('pagos.mp_payment_id'))
             ->selectRaw('cs.id_sistema, count(*) as total')
             ->pluck('total', 'id_sistema');
 

@@ -37,7 +37,7 @@
             <div class="mb-3">
                 <div class="text-muted small">Importe a transferir</div>
                 <div class="fs-3 fw-semibold">{{ $pago->moneda }} {{ number_format($pago->monto, 2, ',', '.') }}</div>
-                <div class="text-muted small">{{ $suscripcion->plan }}@if($suscripcion->cantidad > 1) · {{ $suscripcion->cantidad }} {{ $suscripcion->planCatalogo?->unidad_nombre ?: 'unidades' }}@endif</div>
+                <div class="text-muted small">{{ $pago->detalleTexto() }}</div>
             </div>
 
             <ul class="list-group mb-3">

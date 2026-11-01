@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Pago;
 use App\Models\Suscripcion;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -95,6 +96,35 @@ class MercadoPagoService
         }
 
         return $titulo;
+    }
+
+    /**
+     * Pago único de un Pago concreto (el que ya tiene meses, cantidad y monto definidos).
+     * external_reference = "pago-{id}": el webhook lo reconoce y aplica exactamente ese pago.
+     */
+    public function crearPreferenciaPago(Pago $pago, string $titulo, ?string $email): array
+    {
+        $datos = [
+            'items' => [[
+                'title' => $titulo,
+                'quantity' => 1,
+                'currency_id' => $pago->moneda,
+                'unit_price' => round((float) $pago->monto, 2),
+            ]],
+            'external_reference' => 'pago-'.$pago->id_pago,
+            'back_urls' => config('mercadopago.back_urls'),
+            'auto_return' => 'approved',
+            'notification_url' => config('mercadopago.notification_url'),
+        ];
+
+        if ($email) {
+            $datos['payer'] = ['email' => $email];
+        }
+
+        $response = $this->http()->post("{$this->baseUrl}/checkout/preferences", $datos);
+        $response->throw();
+
+        return $response->json();
     }
 
     public function obtenerPago(string $paymentId): array

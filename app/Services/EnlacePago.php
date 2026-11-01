@@ -13,6 +13,7 @@ use App\Models\SistemaSaas;
  *   ts       timestamp UNIX de generación          (obligatorio)
  *   plan     código del plan del catálogo          (opcional; si va, el plan queda fijo)
  *   cantidad cupo contratado (ej: docentes)        (opcional)
+ *   minimo   cupo mínimo permitido (ej: docentes ya en uso, no se puede bajar de ahí) (opcional)
  *   email, nombre, cuit  datos para dar de alta al cliente si el Panel todavía no lo conoce (opcionales)
  *   firma    HMAC-SHA256 hex
  *
@@ -22,7 +23,7 @@ use App\Models\SistemaSaas;
  */
 class EnlacePago
 {
-    public const PERMITIDOS = ['sistema', 'ref', 'ts', 'plan', 'cantidad', 'email', 'nombre', 'cuit', 'firma'];
+    public const PERMITIDOS = ['sistema', 'ref', 'ts', 'plan', 'cantidad', 'minimo', 'email', 'nombre', 'cuit', 'firma'];
 
     /** Minutos que el enlace sigue siendo válido. */
     public const VIGENCIA_MINUTOS = 60;

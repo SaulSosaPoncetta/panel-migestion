@@ -16,8 +16,8 @@
                     <a href="{{ route('clientes.show', $cs->cliente) }}">{{ $cs->cliente->nombre }}</a></li>
                 <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Email</span><span>{{ $cs->cliente->email }}</span></li>
                 <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Sistema</span><span>{{ $cs->sistema->nombre }}</span></li>
-                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Plan</span>
-                    <span>{{ $pago->suscripcion->plan }}@if($pago->suscripcion->cantidad > 1) · {{ $pago->suscripcion->cantidad }} {{ $pago->suscripcion->planCatalogo?->unidad_nombre ?: 'unidades' }}@endif</span></li>
+                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Qué paga</span>
+                    <span>{{ $pago->detalleTexto() }}</span></li>
                 <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Monto</span>
                     <strong>{{ $pago->moneda }} {{ number_format($pago->monto, 2, ',', '.') }}</strong></li>
                 <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Medio</span>
